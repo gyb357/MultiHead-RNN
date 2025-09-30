@@ -16,14 +16,15 @@ batch_size: 32
 device: 'cpu'  # (cpu, cuda, mps)
 
 # Model settings
-head: 'ann' # (single, multi, ann)
-type: 'ann'   # (ann, ltc, cfc, rnn, lstm, gru)
-hidden_size: 64
+head: 'multi' # (single, multi)
+type: 'rnn'   # (rnn, lstm, gru, ltc, cfc)
+rnn_hidden_size: 16
+fc_hidden_size: 128
 num_classes: 2
 
 # Training settings
 lr: 0.0001
-epochs: 1000
+epochs: 500
 patience: 50
 threshold: 0.50
 
