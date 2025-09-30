@@ -23,6 +23,7 @@ class MultiHead(nn.Module):
                 input_size=1,
                 hidden_size=rnn_hidden_size
             )
+            for _ in range(num_variables)
         ])
 
         # Projection layer
