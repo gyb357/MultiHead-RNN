@@ -3,6 +3,7 @@ import torch
 from yaml import safe_load
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from model.model import MultiHead, SingleHead
+from seed import make_seed_list, derive_seed, set_seed, seed_worker
 from dataset import (
     undersample_dataset,
     processing,
@@ -53,12 +54,22 @@ EPOCHS = config['epochs']
 PATIENCE = config['patience']
 THRESHOLD = config['threshold']
 
+# Seed
+SEED_MASTER = config['seed_master']
+DETERMINISTIC = config['deterministic']
+SEED_LIST = make_seed_list(RUNS, SEED_MASTER)
+
 
 # Main loop
 if __name__ == '__main__':
     for run in range(1, RUNS + 1):
+        base_seed = SEED_LIST[run - 1]
+
         for window in range(WINDOW_START, WINDOW_END + 1):
-            print(f"\n[Run: {run} | Window: {window}]")
+            seed = derive_seed(base_seed, window)
+            set_seed(seed, deterministic=DETERMINISTIC)
+
+            print(f"\n[Run: {run} | Window: {window}] | Seed: {seed}")
 
             # Load datasets
             train_df = pd.read_csv(f'dataset/{window}_train.csv')
@@ -120,9 +131,33 @@ if __name__ == '__main__':
             print(f"CIK status entries: {len(cik_status_df)}")
 
             # DataLoaders
-            train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-            valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False)
-            test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, drop_last=False)
+            g_train = torch.Generator()
+            g_train.manual_seed(seed)
+            g_eval = torch.Generator()
+            g_eval.manual_seed(seed)
+
+            train_loader = DataLoader(
+                train_dataset,
+                batch_size=BATCH_SIZE,
+                shuffle=True,
+                worker_init_fn=seed_worker,
+                generator=g_train
+            )
+            valid_loader = DataLoader(
+                valid_dataset,
+                batch_size=BATCH_SIZE,
+                shuffle=False,
+                worker_init_fn=seed_worker,
+                generator=g_eval
+            )
+            test_loader = DataLoader(
+                test_dataset,
+                batch_size=BATCH_SIZE,
+                shuffle=False,
+                drop_last=False,
+                worker_init_fn=seed_worker,
+                generator=g_eval
+            )
 
             # Device setup
             device = torch.device(DEVICE)
@@ -142,7 +177,7 @@ if __name__ == '__main__':
             print(f"Total Parameters: {get_parameters(model)}")
             
             # Logging path
-            csv_path = f"result/{MODEL.__name__}_{TYPE.upper()}_{SCALER.__class__.__name__}_{THRESHOLD}_rnnsize-{RNN_HIDDEN_SIZE}_fcsize-{FC_HIDDEN_SIZE}"
+            csv_path = f"result/{MODEL.__name__}_{TYPE.upper()}_{SCALER.__class__.__name__}_{THRESHOLD}_rnnsize-{RNN_HIDDEN_SIZE}_fcsize-{FC_HIDDEN_SIZE}_seed-{seed}"
             
             # Training
             train_time = fit(

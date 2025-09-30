@@ -1,3 +1,7 @@
+# Seed settings
+seed_master: 42
+deterministic: false
+
 # Basic run and window settings
 runs: 500
 window_start: 3
