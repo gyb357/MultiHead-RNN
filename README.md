@@ -70,14 +70,28 @@ Simplified recurrent network with gating mechanisms.
 
 ## Model Parameters
 
-| Model Type | Window Size |     Total Parameters     |
-| :--------: | :---------: | :----------------------: |
-|     LTC    |   3, 4, 5   |   1,170 / 1,836 / 2,646  |
-|     CfC    |   3, 4, 5   | 39,384 / 50,976 / 62,568 |
-|     RNN    |   3, 4, 5   |      324 / 504 / 720     |
-|    LSTM    |   3, 4, 5   |   1,296 / 2,016 / 2,880  |
-|     GRU    |   3, 4, 5   |    972 / 1,512 / 2,160   |
-| Classifier |   3, 4, 5   |   3,778 / 4,930 / 6,082  |
+ - rnn_hidden_size = 16
+ - fc_hidden_size = 128
+
+[Multi Head]
+| Model Type | Total Parameters |
+| :--------: | :--------------: |
+|    LTC     |      24055       |
+|    CfC     |      193075      |
+|    RNN     |      8467        |
+|    LSTM    |      24883       |
+|    GRU     |      19411       |
+| Classifier |      2946        |
+
+[Single Head]
+| Model Type | Total Parameters |
+| :--------: | :--------------: |
+|     LTC    |      5544        |
+|     CfC    |      15988       |
+|     RNN    |      3828        |
+|     LSTM   |      5556        |
+|     GRU    |      4980        |
+| Classifier |      2946        |
 
 
 </div>
@@ -149,6 +163,6 @@ python main.py
 ### Results
 
 * Model checkpoints: `result/best_model.pth`
-* Experimental results: `result/{ModelName}_{ScalerName}_{Threshold}_{'valid' or 'test'}.csv`
+* Experimental results: `result/{model name}_{scaler name}_{threshold}_rnnsize-{rnn hidden size}_fcsize-{fc hidden size}.csv`
 * To generate plots: `python plot.py`
 
