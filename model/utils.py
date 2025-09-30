@@ -32,7 +32,15 @@ def get_rnn_layer(
         rnn = types[rnn_type](
             input_size=input_size,
             units=hidden_size,
-            batch_first=batch_first
+            batch_first=batch_first,
+            # LTC specific parameters
+            # ode_unfolds=1,
+
+            # CfC specific parameters
+            # backbone_units=16,
+            # backbone_layers=1,
+            # backbone_dropout=0.0,
+            # activation='tanh'
         )
     return rnn
 

@@ -26,7 +26,7 @@ from sklearn.metrics import (
 
 
 # Progress bar metric name
-METRIC_NAME = "PR-AUC-1"
+METRIC_NAME = "PR-AUC"
 
 
 def fit(
@@ -61,7 +61,7 @@ def fit(
         optimizer,
         mode='max',
         factor=0.5,
-        patience=max(2, patience // 3)
+        patience=patience // 2,
     )
 
     # Training state
@@ -130,7 +130,7 @@ def fit(
                 cik_status=None,
                 csv_path=None
             )
-            valid_metric_raw = valid_metrics[3]  # PR-AUC-1 (average_precision_score)
+            valid_metric_raw = valid_metrics[3] # PR-AUC-1 (average_precision_score)
 
             # Scheduler step
             scheduler.step(valid_metric_raw)
