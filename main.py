@@ -177,7 +177,7 @@ if __name__ == '__main__':
             print(f"Total Parameters: {get_parameters(model)}")
             
             # Logging path
-            csv_path = f"result/{MODEL.__name__}_{TYPE.upper()}_{SCALER.__class__.__name__}_{THRESHOLD}_rnnsize-{RNN_HIDDEN_SIZE}_fcsize-{FC_HIDDEN_SIZE}_seed-{seed}"
+            csv_path = f"result/{MODEL.__name__}_{TYPE.upper()}_{SCALER.__class__.__name__}_{THRESHOLD}_rnnsize-{RNN_HIDDEN_SIZE}_fcsize-{FC_HIDDEN_SIZE}"
             
             # Training
             train_time = fit(
