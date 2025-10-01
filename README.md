@@ -70,10 +70,7 @@ Simplified recurrent network with gating mechanisms.
 
 ## Model Parameters
 
- - rnn_hidden_size = 16
- - fc_hidden_size = 128
-
-[Multi Head]
+**[Multi Head]**
 | Model Type | Total Parameters |
 | :--------: | :--------------: |
 |    LTC     |      24055       |
@@ -83,7 +80,7 @@ Simplified recurrent network with gating mechanisms.
 |    GRU     |      19411       |
 | Classifier |      2946        |
 
-[Single Head]
+**[Single Head]**
 | Model Type | Total Parameters |
 | :--------: | :--------------: |
 |     LTC    |      5544        |
@@ -95,6 +92,11 @@ Simplified recurrent network with gating mechanisms.
 
 
 </div>
+
+```bash
+rnn_hidden_size = 16
+fc_hidden_size = 128
+```
 
 
 ---
@@ -163,6 +165,6 @@ python main.py
 ### Results
 
 * Model checkpoints: `result/best_model.pth`
-* Experimental results: `result/{model name}_{scaler name}_{threshold}_rnnsize-{rnn hidden size}_fcsize-{fc hidden size}.csv`
-* To generate plots: `python plot.py`
+* Experimental results: `result/[Model Name]_[Scaler Name]_[Threshold]_[RNN Hidden Size]_[FC Hidden Size].csv`
+* Show plots: `python plot.py`
 
