@@ -173,6 +173,7 @@ if __name__ == '__main__':
 
             # Model summary
             print(f"RNN Parameters: {get_parameters(model.rnn)}")
+            print(f"Projection Parameters: {get_parameters(model.proj)}")
             print(f"FC Parameters: {get_parameters(model.fc)}")
             print(f"Total Parameters: {get_parameters(model)}")
             
@@ -227,4 +228,3 @@ if __name__ == '__main__':
                 train_time=train_time,
                 csv_path=csv_path + "_test.csv"
             )
-
