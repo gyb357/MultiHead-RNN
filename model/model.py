@@ -7,6 +7,8 @@ from torch import Tensor
 
 
 class MultiHead(nn.Module):
+    proj_dim: int = 1
+
     def __init__(
             self,
             num_variables: int,
@@ -27,9 +29,10 @@ class MultiHead(nn.Module):
         ])
 
         # Projection layer
-        self.proj = nn.Linear(rnn_hidden_size, 1)
-        nn.init.xavier_uniform_(self.proj.weight)
-        nn.init.zeros_(self.proj.bias)
+        self.proj = nn.ModuleList([nn.Linear(rnn_hidden_size, self.proj_dim) for _ in range(num_variables)])
+        for layer in self.proj:
+            nn.init.xavier_uniform_(layer.weight)
+            nn.init.zeros_(layer.bias)
 
         # MLP Classifier
         self.fc = Classifier(
@@ -38,15 +41,15 @@ class MultiHead(nn.Module):
             num_classes=num_classes
         )
 
-        # Initialize weights
+        # Initialize RNN module weights
         self.apply(init_weights)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         outputs: List[Tensor] = []
 
-        for rnn, var in zip(self.rnn, x):
+        for rnn, proj, var in zip(self.rnn, self.proj, x):
             seq, _ = rnn(var)
-            proj = self.proj(seq[:, -1, :])
+            proj = proj(seq[:, -1, :])
             outputs.append(proj)
 
         concat = torch.cat(outputs, dim=1)
