@@ -7,13 +7,12 @@ from torch import Tensor
 
 
 class MultiHead(nn.Module):
-    proj_dim: int = 1
-
     def __init__(
             self,
             num_variables: int,
             rnn_hidden_size: int,
             fc_hidden_size: int,
+            proj_dim: int,
             num_classes: int,
             rnn_type: str
     ) -> None:
@@ -29,14 +28,12 @@ class MultiHead(nn.Module):
         ])
 
         # Projection layer
-        self.proj = nn.ModuleList([nn.Linear(rnn_hidden_size, self.proj_dim) for _ in range(num_variables)])
-        for layer in self.proj:
-            nn.init.xavier_uniform_(layer.weight)
-            nn.init.zeros_(layer.bias)
+        self.projection = nn.ModuleList([nn.Linear(rnn_hidden_size, proj_dim) for _ in range(num_variables)])
+        self.layer_norm = nn.LayerNorm(num_variables * proj_dim)
 
         # MLP Classifier
         self.fc = Classifier(
-            input_size=num_variables,
+            input_size=num_variables * proj_dim,
             hidden_size=fc_hidden_size,
             num_classes=num_classes
         )
@@ -44,16 +41,22 @@ class MultiHead(nn.Module):
         # Initialize RNN module weights
         self.apply(init_weights)
 
+        # Initialize projection weights
+        for proj in self.projection:
+            nn.init.xavier_uniform_(proj.weight)
+            nn.init.zeros_(proj.bias)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         outputs: List[Tensor] = []
 
-        for rnn, proj, var in zip(self.rnn, self.proj, x):
+        for rnn, proj, var in zip(self.rnn, self.projection, x):
             seq, _ = rnn(var)
-            proj = proj(seq[:, -1, :])
-            outputs.append(proj)
+            proj_ = proj(seq[:, -1, :])
+            outputs.append(proj_)
 
         concat = torch.cat(outputs, dim=1)
-        return self.fc(concat)
+        norm = self.layer_norm(concat)
+        return self.fc(norm)
 
 
 class SingleHead(nn.Module):
@@ -62,6 +65,7 @@ class SingleHead(nn.Module):
             num_variables: int,
             rnn_hidden_size: int,
             fc_hidden_size: int,
+            proj_dim: int,
             num_classes: int,
             rnn_type: str
     ) -> None:
@@ -74,23 +78,27 @@ class SingleHead(nn.Module):
         )
 
         # Projection layer
-        self.proj = nn.Linear(rnn_hidden_size, num_variables)
-        nn.init.xavier_uniform_(self.proj.weight)
-        nn.init.zeros_(self.proj.bias)
+        self.projection = nn.Linear(rnn_hidden_size, num_variables * proj_dim)
+        self.layer_norm = nn.LayerNorm(num_variables * proj_dim)
 
         # MLP Classifier
         self.fc = Classifier(
-            input_size=num_variables,
+            input_size=num_variables * proj_dim,
             hidden_size=fc_hidden_size,
             num_classes=num_classes
         )
 
-        # Initialize weights
+        # Initialize RNN module weights
         self.apply(init_weights)
+
+        # Initialize projection weights
+        nn.init.xavier_uniform_(self.projection.weight)
+        nn.init.zeros_(self.projection.bias)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = torch.cat(x, dim=-1) # Last dimension concatenation
         seq, _ = self.rnn(x)
-        proj = self.proj(seq[:, -1, :])
-        return self.fc(proj)
+        proj = self.projection(seq[:, -1, :])
+        norm = self.layer_norm(proj)
+        return self.fc(norm)
 

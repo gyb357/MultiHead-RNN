@@ -4,8 +4,7 @@ from torch import Tensor
 
 
 class Classifier(nn.Module):
-    normalize: Type[nn.Module] = nn.LayerNorm  # nn.BatchNorm1d, ...
-    activation: Type[nn.Module] = nn.Sigmoid   # nn.ReLU, nn.GELU, nn.Tanh, ...
+    activation: Type[nn.Module] = nn.GELU  # Sigmoid, Tanh, ReLU, GELU, ... etc.
 
     def __init__(
             self,
@@ -19,7 +18,6 @@ class Classifier(nn.Module):
         # Sequential layer
         self.layer = nn.Sequential(
             nn.Linear(input_size, hidden_size, bias),
-            self.normalize(hidden_size),
             self.activation(),
             nn.Dropout(dropout),
             nn.Linear(hidden_size, num_classes, bias),

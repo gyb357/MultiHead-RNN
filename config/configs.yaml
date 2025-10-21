@@ -3,7 +3,7 @@ seed_master: 42
 deterministic: false
 
 # Basic run and window settings
-runs: 500
+runs: 300
 window_start: 3
 window_end: 5
 
@@ -13,24 +13,26 @@ bal_valid: false
 bal_test: false
 
 # Scaler settings (standard, robust, minmax)
-scaler: 'standard'
+scaler: 'robust'
 
 # DataLoader settings
 batch_size: 32
 device: 'cpu'  # (cpu, cuda, mps)
 
 # Model settings
-head: 'multi' # (single, multi)
-type: 'rnn'   # (rnn, lstm, gru, ltc, cfc)
-rnn_hidden_size: 16
+head: 'single' # (single, multi)
+type: 'cfc'   # (rnn, lstm, gru, ltc, cfc)
+rnn_hidden_size: 64
 fc_hidden_size: 128
+projection_dim: 1
 num_classes: 2
 
 # Training settings
 lr: 0.0001
-epochs: 500
-patience: 50
+epochs: 300
+patience: 30
 threshold: 0.50
 
 # Plot
 window: 5 # (3, 4, 5)
+

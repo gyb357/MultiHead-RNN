@@ -48,6 +48,7 @@ MODEL = _head[config['head']]
 TYPE = config['type']
 RNN_HIDDEN_SIZE = config['rnn_hidden_size']
 FC_HIDDEN_SIZE = config['fc_hidden_size']
+PROJECTION_DIM = config['projection_dim']
 NUM_CLASSES = config['num_classes']
 LR = config['lr']
 EPOCHS = config['epochs']
@@ -164,16 +165,17 @@ if __name__ == '__main__':
             print(f"Using device: {device}")
 
             model = MODEL(
-                rnn_hidden_size=RNN_HIDDEN_SIZE,
                 num_variables=len(variables),
+                rnn_hidden_size=RNN_HIDDEN_SIZE,
                 fc_hidden_size=FC_HIDDEN_SIZE,
+                proj_dim=PROJECTION_DIM,
                 num_classes=NUM_CLASSES,
                 rnn_type=TYPE
             ).to(device)
 
             # Model summary
             print(f"RNN Parameters: {get_parameters(model.rnn)}")
-            print(f"Projection Parameters: {get_parameters(model.proj)}")
+            print(f"Projection Parameters: {get_parameters(model.projection)}")
             print(f"FC Parameters: {get_parameters(model.fc)}")
             print(f"Total Parameters: {get_parameters(model)}")
             
@@ -228,3 +230,4 @@ if __name__ == '__main__':
                 train_time=train_time,
                 csv_path=csv_path + "_test.csv"
             )
+
