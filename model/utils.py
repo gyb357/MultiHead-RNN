@@ -37,7 +37,7 @@ def get_rnn_layer(
             # ode_unfolds=1,
 
             # CfC specific parameters
-            backbone_units=16,
+            backbone_units=15,
             backbone_layers=1,
             activation='tanh'
         )

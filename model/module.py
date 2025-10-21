@@ -12,12 +12,13 @@ class Classifier(nn.Module):
             hidden_size: int,
             num_classes: int,
             bias: bool = True,
-            dropout: float = 0.0
+            dropout: float = 0.1
     ) -> None:
         super(Classifier, self).__init__()
         # Sequential layer
         self.layer = nn.Sequential(
             nn.Linear(input_size, hidden_size, bias),
+            nn.LayerNorm(hidden_size),
             self.activation(),
             nn.Dropout(dropout),
             nn.Linear(hidden_size, num_classes, bias),

@@ -20,9 +20,9 @@ batch_size: 32
 device: 'cpu'  # (cpu, cuda, mps)
 
 # Model settings
-head: 'single' # (single, multi)
+head: 'multi' # (single, multi)
 type: 'cfc'   # (rnn, lstm, gru, ltc, cfc)
-rnn_hidden_size: 64
+rnn_hidden_size: 18
 fc_hidden_size: 128
 projection_dim: 1
 num_classes: 2
