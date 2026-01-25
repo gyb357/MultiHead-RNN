@@ -2,8 +2,7 @@
 
 1. [Introduction](#Introduction)
 2. [Architecture Overview](#Architecture-Overview)
-3. [Model Comparison](#Model-Comparison)
-4. [Getting Started](#Getting-Started)
+3. [Getting Started](#Getting-Started)
    * Check the Running Environment
    * Installation and Dependencies
    * Download Datasets
@@ -61,42 +60,6 @@ Traditional recurrent network with memory cells.
 ### 5. Gated Recurrent Unit (GRU)
 
 Simplified recurrent network with gating mechanisms.
-
-
-
-# 📋Model Comparison
-
-<div align="center">
-
-## Model Parameters
-
-**[Multi Head]**
-| Model Type | Total Parameters |
-| :--------: | :--------------: |
-|    LTC     |      24055       |
-|    CfC     |      193075      |
-|    RNN     |      8467        |
-|    LSTM    |      24883       |
-|    GRU     |      19411       |
-| Classifier |      2946        |
-
-**[Single Head]**
-| Model Type | Total Parameters |
-| :--------: | :--------------: |
-|     LTC    |      5544        |
-|     CfC    |      15988       |
-|     RNN    |      3828        |
-|     LSTM   |      5556        |
-|     GRU    |      4980        |
-| Classifier |      2946        |
-
-
-</div>
-
-```bash
-rnn_hidden_size = 16
-fc_hidden_size = 128
-```
 
 
 ---

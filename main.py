@@ -4,9 +4,9 @@ from yaml import safe_load
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from model.model import MultiHead, SingleHead
 from seed import make_seed_list, derive_seed, set_seed, seed_worker
-from dataset import (
-    undersample_dataset,
-    processing,
+from dataset.dataset import (
+    undersampling,
+    separate_labels,
     extract_variable_train,
     to_tensor_dataset
 )
@@ -77,10 +77,28 @@ if __name__ == '__main__':
             valid_df = pd.read_csv(f'dataset/{window}_valid.csv')
             test_df = pd.read_csv(f'dataset/{window}_test.csv')
 
+            # train_df = train_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
+            # valid_df = valid_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
+            # test_df = test_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
+
+
+            # # Validation of dataset
+            # print(train_df.head(20)[['company_name', 'fyear', 'status', 'status_label']])
+
+            # company_counts = train_df.groupby('company_name').size()
+            # invalid_companies = company_counts[company_counts % window != 0]
+            # if len(invalid_companies) > 0:
+            #     print(len(invalid_companies))
+            #     print(invalid_companies.head())
+
+            # is_sorted = train_df.equals(train_df.sort_values(['company_name', 'fyear']))
+            # print(f"Train DataFrame sorted by company_name and fyear: {is_sorted}")
+
+
             # Preprocess datasets (optional undersampling)
-            if BAL_TRAIN: train_df = undersample_dataset(train_df, window)  # BAL_TRAIN = True
-            if BAL_VALID: valid_df = undersample_dataset(valid_df, window)  # BAL_VALID = False
-            if BAL_TEST: test_df = undersample_dataset(test_df, window)     # BAL_TEST = False
+            if BAL_TRAIN: train_df = undersampling(train_df, window)  # BAL_TRAIN = True
+            if BAL_VALID: valid_df = undersampling(valid_df, window)  # BAL_VALID = False
+            if BAL_TEST: test_df = undersampling(test_df, window)  # BAL_TEST = False
 
             # CIK and status for evaluation
             cik_status = test_df[['cik', 'status']].copy()
@@ -89,10 +107,10 @@ if __name__ == '__main__':
             # [0:num_samples:window] = 0, window, 2 * window, ..., (n-1) * window
 
             # Feature-target split
-            x_train, y_train = processing(train_df)
-            x_valid, y_valid = processing(valid_df)
-            x_test, y_test = processing(test_df)
-            
+            x_train, y_train = separate_labels(train_df)
+            x_valid, y_valid = separate_labels(valid_df)
+            x_test, y_test = separate_labels(test_df)
+
             # Variable extraction
             variables = x_train.columns.tolist()
 
@@ -167,10 +185,18 @@ if __name__ == '__main__':
             model = MODEL(
                 num_variables=len(variables),
                 rnn_hidden_size=RNN_HIDDEN_SIZE,
+                projection_size=PROJECTION_DIM,
                 fc_hidden_size=FC_HIDDEN_SIZE,
-                proj_dim=PROJECTION_DIM,
                 num_classes=NUM_CLASSES,
-                rnn_type=TYPE
+                rnn_type=TYPE,
+                t_max=window,
+                dropout=0.0,
+
+                # kwargs
+                activation='tanh',
+                backbone_units=26,
+                backbone_layers=1,
+                backbone_dropout=0.0
             ).to(device)
 
             # Model summary
