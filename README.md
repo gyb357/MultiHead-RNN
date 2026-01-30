@@ -80,8 +80,6 @@ python -c "import torch; print(torch.__version__); print('CUDA available:', torc
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/gyb357/MultiHeadLNN
-cd MultiHeadLNN
 pip install -r requirements.txt
 ```
 
@@ -100,8 +98,6 @@ pip install -r requirements.txt
 ```bash
 https://github.com/sowide/multi-head_LSTM_for_bankruptcy-prediction
 ```
-
-> **Note:** The dataset is under a CC-BY-4.0 license. Please refer to each repository's README.
 
 ## 4. Configuration
 

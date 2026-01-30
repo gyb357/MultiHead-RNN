@@ -5,8 +5,10 @@ from typing import Tuple, List
 from torch.utils.data import TensorDataset
 
 
-# Separation label and columns to pop
+# Name of the label column
 _LABEL = 'status'
+
+# Names of columns to be removed from features
 _POP = [
     'status_label',
     'cik',
@@ -51,7 +53,7 @@ def undersampling(df: pd.DataFrame, window: int) -> pd.DataFrame:
     # Sort by 'status' and 'company_name'
     group = df.groupby(['status', 'company_name'], sort=False)
 
-    # Reconstruct DataFrame
+    # Reconstruct dataframe
     df_list = []
     for key, _ in group:
         df_group = group.get_group(key).sort_values('fyear')

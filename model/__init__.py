@@ -9,7 +9,6 @@ from .utils import create_rnn_layer, initialize_weights
 __all__ = [
     'nn',
     'torch',
-
     'Dict', 'Any', 'Set', 'Optional',
     'LTC', 'CfC',
     'Tensor',

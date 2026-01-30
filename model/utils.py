@@ -28,6 +28,7 @@ def _validate_kwargs(
         forbidden: Set[str],
         allowed: Optional[Set[str]]
 ) -> None:
+    # Extract keys from kwargs
     keys = set(kwargs.keys())
 
     # Check forbidden arguments

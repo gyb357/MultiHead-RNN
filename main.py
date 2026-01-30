@@ -3,7 +3,7 @@ import torch
 from yaml import safe_load
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from model.model import MultiHead, SingleHead
-from seed import make_seed_list, derive_seed, set_seed, seed_worker
+from train.seed import make_seed_list, derive_seed, set_seed, seed_worker
 from dataset.dataset import (
     undersampling,
     separate_labels,
@@ -48,11 +48,12 @@ MODEL = _head[config['head']]
 TYPE = config['type']
 RNN_HIDDEN_SIZE = config['rnn_hidden_size']
 FC_HIDDEN_SIZE = config['fc_hidden_size']
-PROJECTION_DIM = config['projection_dim']
+PROJECTION_SIZE = config['projection_dim']
 NUM_CLASSES = config['num_classes']
 LR = config['lr']
 EPOCHS = config['epochs']
 PATIENCE = config['patience']
+ACCUMULATION_STEPS = config['accumulation_steps']
 THRESHOLD = config['threshold']
 
 # Seed
@@ -77,28 +78,10 @@ if __name__ == '__main__':
             valid_df = pd.read_csv(f'dataset/{window}_valid.csv')
             test_df = pd.read_csv(f'dataset/{window}_test.csv')
 
-            # train_df = train_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
-            # valid_df = valid_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
-            # test_df = test_df.sort_values(['company_name', 'fyear']).reset_index(drop=True)
-
-
-            # # Validation of dataset
-            # print(train_df.head(20)[['company_name', 'fyear', 'status', 'status_label']])
-
-            # company_counts = train_df.groupby('company_name').size()
-            # invalid_companies = company_counts[company_counts % window != 0]
-            # if len(invalid_companies) > 0:
-            #     print(len(invalid_companies))
-            #     print(invalid_companies.head())
-
-            # is_sorted = train_df.equals(train_df.sort_values(['company_name', 'fyear']))
-            # print(f"Train DataFrame sorted by company_name and fyear: {is_sorted}")
-
-
             # Preprocess datasets (optional undersampling)
             if BAL_TRAIN: train_df = undersampling(train_df, window)  # BAL_TRAIN = True
             if BAL_VALID: valid_df = undersampling(valid_df, window)  # BAL_VALID = False
-            if BAL_TEST: test_df = undersampling(test_df, window)  # BAL_TEST = False
+            if BAL_TEST: test_df = undersampling(test_df, window)     # BAL_TEST = False
 
             # CIK and status for evaluation
             cik_status = test_df[['cik', 'status']].copy()
@@ -155,21 +138,21 @@ if __name__ == '__main__':
             g_eval = torch.Generator()
             g_eval.manual_seed(seed)
 
-            train_loader = DataLoader(
+            train_dataloader = DataLoader(
                 train_dataset,
                 batch_size=BATCH_SIZE,
                 shuffle=True,
                 worker_init_fn=seed_worker,
                 generator=g_train
             )
-            valid_loader = DataLoader(
+            valid_dataloader = DataLoader(
                 valid_dataset,
                 batch_size=BATCH_SIZE,
                 shuffle=False,
                 worker_init_fn=seed_worker,
                 generator=g_eval
             )
-            test_loader = DataLoader(
+            test_dataloader = DataLoader(
                 test_dataset,
                 batch_size=BATCH_SIZE,
                 shuffle=False,
@@ -185,18 +168,17 @@ if __name__ == '__main__':
             model = MODEL(
                 num_variables=len(variables),
                 rnn_hidden_size=RNN_HIDDEN_SIZE,
-                projection_size=PROJECTION_DIM,
+                projection_size=PROJECTION_SIZE,
                 fc_hidden_size=FC_HIDDEN_SIZE,
                 num_classes=NUM_CLASSES,
                 rnn_type=TYPE,
                 t_max=window,
-                dropout=0.0,
 
                 # kwargs
-                activation='tanh',
-                backbone_units=26,
-                backbone_layers=1,
-                backbone_dropout=0.0
+                # activation='lecun_tanh',
+                # backbone_units=26,
+                # backbone_layers=1,
+                # backbone_dropout=0.0
             ).to(device)
 
             # Model summary
@@ -206,17 +188,27 @@ if __name__ == '__main__':
             print(f"Total Parameters: {get_parameters(model)}")
             
             # Logging path
-            csv_path = f"result/{MODEL.__name__}_{TYPE.upper()}_{SCALER.__class__.__name__}_{THRESHOLD}_rnnsize-{RNN_HIDDEN_SIZE}_fcsize-{FC_HIDDEN_SIZE}"
-            
+            csv_path = (
+                f"result/"
+                f"{MODEL.__name__}_"
+                f"{TYPE.upper()}_"
+                f"{SCALER.__class__.__name__}_"
+                f"{THRESHOLD}_"
+                f"rnnsize-{RNN_HIDDEN_SIZE}_"
+                f"fcsize-{FC_HIDDEN_SIZE}"
+            )
+
             # Training
-            train_time = fit(
+            fit(
                 model=model,
-                train_loader=train_loader,
-                valid_loader=valid_loader,
+                train_dataloader=train_dataloader,
+                valid_dataloader=valid_dataloader,
                 device=device,
-                lr=LR,
                 epochs=EPOCHS,
+                lr=LR,
                 patience=PATIENCE,
+                accumulation_steps=ACCUMULATION_STEPS,
+                num_classes=NUM_CLASSES,
                 threshold=THRESHOLD,
                 run=run,
                 window=window,
@@ -236,24 +228,18 @@ if __name__ == '__main__':
 
             metrics = eval(
                 model=model,
-                data_loader=test_loader,
+                data_loader=test_dataloader,
                 device=device,
                 threshold=THRESHOLD,
                 cik_status=cik_status_df,
                 csv_path=csv_path + f"_window-{window}_preds.csv"
             )
-            # Log metrics
-            print(f"[Window {window}] "
-                  f"Test Accuracy = {metrics[0]:.4f}, "
-                  f"AUC = {metrics[1]:.4f}, "
-                  f"BAC = {metrics[2]:.4f}")
-            
             # Save predictions
             save_results(
                 run=run,
                 window=window,
                 metrics=metrics,
-                train_time=train_time,
+                train_time=0,
                 csv_path=csv_path + "_test.csv"
             )
 
