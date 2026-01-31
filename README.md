@@ -2,8 +2,7 @@
 
 1. [Introduction](#Introduction)
 2. [Architecture Overview](#Architecture-Overview)
-3. [Model Comparison](#Model-Comparison)
-4. [Getting Started](#Getting-Started)
+3. [Getting Started](#Getting-Started)
    * Check the Running Environment
    * Installation and Dependencies
    * Download Datasets
@@ -63,42 +62,6 @@ Traditional recurrent network with memory cells.
 Simplified recurrent network with gating mechanisms.
 
 
-
-# 📋Model Comparison
-
-<div align="center">
-
-## Model Parameters
-
-**[Multi Head]**
-| Model Type | Total Parameters |
-| :--------: | :--------------: |
-|    LTC     |      24055       |
-|    CfC     |      193075      |
-|    RNN     |      8467        |
-|    LSTM    |      24883       |
-|    GRU     |      19411       |
-| Classifier |      2946        |
-
-**[Single Head]**
-| Model Type | Total Parameters |
-| :--------: | :--------------: |
-|     LTC    |      5544        |
-|     CfC    |      15988       |
-|     RNN    |      3828        |
-|     LSTM   |      5556        |
-|     GRU    |      4980        |
-| Classifier |      2946        |
-
-
-</div>
-
-```bash
-rnn_hidden_size = 16
-fc_hidden_size = 128
-```
-
-
 ---
 
 
@@ -117,8 +80,6 @@ python -c "import torch; print(torch.__version__); print('CUDA available:', torc
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/gyb357/MultiHeadLNN
-cd MultiHeadLNN
 pip install -r requirements.txt
 ```
 
@@ -137,8 +98,6 @@ pip install -r requirements.txt
 ```bash
 https://github.com/sowide/multi-head_LSTM_for_bankruptcy-prediction
 ```
-
-> **Note:** The dataset is under a CC-BY-4.0 license. Please refer to each repository's README.
 
 ## 4. Configuration
 

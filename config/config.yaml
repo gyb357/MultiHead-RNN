@@ -1,0 +1,50 @@
+# Seed
+seed_master: 42
+deterministic: false
+
+# Run and window
+runs: 100
+window_start: 3
+window_end: 5
+
+# Undersampling
+undersample_train: true
+undersample_valid: false
+undersample_test: false
+
+# Scaler (standard, robust, minmax)
+scaler: standard
+
+# DataLoader
+batch_size: 64
+device: cpu  # (cpu, cuda, mps)
+
+# Model
+head: multi  # (single, multi)
+type: cfc    # (rnn, lstm, gru, ltc, cfc)
+rnn_hidden_size: 32
+projection_size: 1
+fc_hidden_size: 32
+num_classes: 2
+dropout: 0.0
+
+# RNN kwargs (LTC, CfC only)
+rnn_kwargs:
+  # LTC
+  # ode_unfolds: 6
+  # CfC
+  activation: tanh
+  backbone_units: 26
+  backbone_layers: 1
+  backbone_dropout: 0.0
+
+# Training
+epochs: 100
+lr: 0.001
+patience: 20
+accumulation_steps: 1
+threshold: 0.50
+
+# Plot
+window: 5 # (3, 4, 5)
+
