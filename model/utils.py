@@ -187,7 +187,3 @@ def initialize_weights(
             if getattr(m, "bias", None) is not None:
                 nn.init.zeros_(m.bias)
 
-
-def get_parameters(model: nn.Module) -> int:
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-

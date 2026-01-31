@@ -31,11 +31,11 @@ def _shuffle_group(df: pd.DataFrame, window: int) -> pd.DataFrame:
 
 
 def _extract_labels(
-        df: pd.DataFrame,
+        df: pd.Series,
         window: int
 ) -> np.ndarray:
     df = df.values.reshape(len(df) // window, window)
-
+    
     return df[:, 1]
 
 
@@ -100,8 +100,8 @@ def to_tensor_dataset(
         y: pd.Series,
         window: int
 ) -> TensorDataset:
-    return TensorDataset(
-        *[torch.from_numpy(arr).float() for arr in x_list],
-        torch.from_numpy(_extract_labels(y, window)).long()
-    )
+    feature_tensors = [torch.from_numpy(arr.copy()).float() for arr in x_list]
+    label_tensor = torch.from_numpy(_extract_labels(y, window).copy()).long()
+
+    return TensorDataset(*feature_tensors, label_tensor)
 
