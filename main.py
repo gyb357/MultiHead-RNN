@@ -3,19 +3,20 @@ import pandas as pd
 import torch
 import time
 from omegaconf import DictConfig
-from seed import make_seed_list, derive_seed, set_seed, seed_worker
-from utils import get_scaler, get_model_class, get_parameters
-from dataset.dataset import undersampling, separate_labels, extract_variable_train, to_tensor_dataset
+from util.seed import make_seed_list, derive_seed, set_seed, seed_worker
+from util.utils import get_scaler, get_model_class, get_parameters
+from util.dataset import undersampling, separate_labels, extract_variable_train, to_tensor_dataset
 from torch.utils.data import DataLoader
 from train.train import fit, eval, save_results
 
 
+# Configuration
 _CONFIG_PATH = 'config'
 _CONFIG_NAME = 'config'
 
 
 # Main function
-@hydra.main(version_base=None, config_path=_CONFIG_PATH, config_name=_CONFIG_NAME)
+@hydra.main(_CONFIG_PATH, _CONFIG_NAME, version_base=None)
 def main(cfg: DictConfig) -> None:
     # Setup
     seed_list = make_seed_list(cfg.runs, cfg.seed_master)  # Seed configuration
@@ -113,6 +114,9 @@ def main(cfg: DictConfig) -> None:
             # Device setup
             device = torch.device(cfg.device)
 
+            # RNN kwargs
+            rnn_kwargs = cfg.get('rnn_kwargs', {}) or {}
+
             # Model initialization
             model = model_type(
                 num_variables=len(variables),
@@ -123,7 +127,7 @@ def main(cfg: DictConfig) -> None:
                 rnn_type=cfg.type,
                 t_max=window,
                 dropout=cfg.dropout,
-                **cfg.rnn_kwargs
+                **rnn_kwargs
             ).to(device)
 
             # Model summary
@@ -133,7 +137,7 @@ def main(cfg: DictConfig) -> None:
             print(f"Total Parameters: {get_parameters(model)}")
 
             # Logging path
-            csv_path = (
+            csv_save_path = (
                 f"result/"
                 f"{model_type.__name__}"
                 f"{cfg.type.upper()}_"
@@ -157,7 +161,7 @@ def main(cfg: DictConfig) -> None:
                 threshold=cfg.threshold,
                 run=run,
                 window=window,
-                csv_path=csv_path + "_valid.csv"
+                csv_path=csv_save_path + "_valid.csv"
             )
 
             # Load best model for evaluation
@@ -172,7 +176,7 @@ def main(cfg: DictConfig) -> None:
                 device=device,
                 threshold=cfg.threshold,
                 cik_status=cik_status_df,
-                csv_path=csv_path + f"_window-{window}_preds.csv"
+                csv_path=csv_save_path + f"_window-{window}_preds.csv"
             )
             end_time = time.time()
 
@@ -182,7 +186,7 @@ def main(cfg: DictConfig) -> None:
                 window=window,
                 metrics=test_metrics,
                 train_time=end_time - start_time,
-                csv_path=csv_path + "_test.csv"
+                csv_path=csv_save_path + "_test.csv"
             )
 
 
