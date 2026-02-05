@@ -6,15 +6,15 @@ from torch.utils.data import TensorDataset
 
 
 # Name of the label column
-_LABEL = 'status'
+_LABEL = 'status'    # Bankruptcy Status (numeric)
 
 # Names of columns to be removed from features
 _POP = [
-    'status_label',
-    'cik',
-    'fyear',
-    'company_name',
-    'tic'
+    'status_label',  # Bankruptcy Status (text)
+    'cik',           # Central Index Key
+    'fyear',         # Fiscal Year
+    'company_name',  # Company Name
+    'tic',           # Ticker
 ]
 
 

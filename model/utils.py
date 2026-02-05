@@ -1,7 +1,7 @@
 from . import *
 
 
-# Default arguments for standard RNN
+# Default arguments for RNN (RNN, LSTM, GRU)
 _DEFAULT_ARGS = {
     'num_layers': 1,
     'bias': True,
@@ -9,7 +9,7 @@ _DEFAULT_ARGS = {
     'bidirectional': False
 }
 
-# Forbidden arguments for standard RNN
+# Forbidden arguments for RNN (RNN, LSTM, GRU)
 _FORBIDDEN_ARGS = set(_DEFAULT_ARGS.keys())
 
 # Allowed additional arguments

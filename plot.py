@@ -1,144 +1,133 @@
+import yaml
 import pandas as pd
 import numpy as np
 import matplotlib.colors as mcolors
 import math
 import matplotlib.pyplot as plt
-from yaml import safe_load
+from train.utils import ClassificationMetrics
 from pathlib import Path
 
 
-with open('config/configs.yaml', 'r') as file:
-    config = safe_load(file)
+# Models
+_MODELS = ['RNN', 'LSTM', 'GRU', 'LTC', 'CfC']
+
+# Window
+_WINDOW = 5
+
+# Number of columns in the plot grid
+_NUM_COLS = 4
+
+# Boxplot Colors
+_HEX_START = '#FCB9AA'
+_HEX_END = "#35ABA5"
 
 
-# Constants
-WINDOW = config['window']
-COLUMNS = [
-  'run', 'window',
-  'tp', 'tn', 'fp', 'fn',
-  'acc', 'roc_auc', 'bac',
-  'pr_auc1', 'pr_auc2',
-  'micro_f1', 'macro_f1',
-  'type_1_error', 'type_2_error',
-  'rec_bankruptcy', 'pr_bankruptcy', 'rec_healthy', 'pr_healthy',
-  'train_time'
-]
-METRICS = COLUMNS[2:]
+# Main function
+def main() -> None:
+    # Setup
+    columns = list(ClassificationMetrics._fields) + ['run', 'window', 'train_time']
+    metrics = columns[:16]
 
+    # Load csv
+    files = list(Path('result/').glob('*.csv'))
+    print(f"Found {len(files)} csv files.")
+    if not files:
+        raise FileNotFoundError("No CSV files found in the 'result' directory.")
+    
+    df_list = []
+    for file in files:
+        # Extract model name from filename
+        filename = file.stem
+        model_found = None
+        
+        # Check if any model name is in the filename
+        for model in _MODELS:
+            if model.lower() in filename.lower():
+                model_found = model
+                break
+        
+        if model_found is None:
+            print(f"Warning: No valid model found in filename '{filename}'. Skipping this file.")
+            continue
+            
+        df = pd.read_csv(file, names=columns, header=0)
+        df['model'] = model_found
+        df_list.append(df)
 
-# Load CSV data
-csv_files = list(Path('result/').glob('*.csv'))
-if not csv_files:
-    raise FileNotFoundError("No CSV files found in the 'result' directory.")
+    # Concatenate all dataframes
+    df = pd.concat(df_list, ignore_index=True)
 
-df: list = []
-for file in csv_files:
-    # Read CSV file
-    df_tmp = pd.read_csv(file, names=COLUMNS, header=0)
-    # Set model name from file name
-    df_tmp['model'] = file.stem
-    # Print number of rows
-    print(f"{file.stem}: {len(df_tmp)} rows")
-    # append to list
-    df.append(df_tmp)
+    # Filter by window
+    df = df[df['window'] == _WINDOW]
 
-# Concatenate all dataframes
-df = pd.concat(df, ignore_index=True)
+    # Convert metrics to numeric
+    df[metrics] = df[metrics].apply(pd.to_numeric, errors='coerce')
 
-# Filter by window
-df = df[df['window'] == WINDOW]
-df[METRICS] = df[METRICS].apply(pd.to_numeric, errors='coerce')
-
-# Sort
-scaler_prio = ['StandardScaler', 'RobustScaler']
-arch_prio   = ['ANN', 'RNN', 'LSTM', 'GRU', 'CfC']
-
-# Get unique models
-unique_models = df['model'].unique().tolist()
-models = sorted(
-    unique_models,
-    key=lambda m: (
-        # Scaler
-        scaler_prio.index(m.split('_results_')[1].split('_')[0])
-            if '_results_' in m
-               and m.split('_results_')[1].split('_')[0] in scaler_prio
-            else len(scaler_prio),
-        # Model name
-        next(
-            (arch_prio.index(a) for a in arch_prio if a in m.upper()),
-            len(arch_prio)
+    # Median summary
+    print(f"\n[Window={_WINDOW}] Best model(s) by median for each metric\n" + "-"*70)
+    for metric in metrics:
+        medians = (
+            df
+            .groupby('model')[metric]
+            .median()
+            .dropna()
         )
+        if medians.empty:
+            print(f"{metric.upper():<20} | No data available")
+            continue
+
+        best_score = medians.max()
+        best_models = medians[medians == best_score].index.tolist()
+        best_models_str = ", ".join(best_models)
+
+        print(f"{metric.upper():<20} | best median = {best_score:.3f} | model(s): {best_models_str}")
+    print("-"*70 + "\n")
+
+    # Generate pastel colors for each model
+    start_rgb = np.array(mcolors.to_rgb(_HEX_START))
+    end_rgb   = np.array(mcolors.to_rgb(_HEX_END))
+
+    n_models = len(_MODELS)
+    if n_models > 1:
+        pastel_colors = [
+            mcolors.to_hex(start_rgb + (end_rgb - start_rgb) * i/(n_models-1))
+            for i in range(n_models)
+        ]
+    else:
+        pastel_colors = [_HEX_START]
+
+    # Draw boxplots
+    nrows = math.ceil(len(metrics) / _NUM_COLS)
+    fig, axes = plt.subplots(
+        nrows=nrows,
+        ncols=_NUM_COLS,
+        figsize=(6*_NUM_COLS, 6*nrows),
+        constrained_layout=False
     )
-)
+    fig.suptitle(f'Model Comparison on Window={_WINDOW} Across Metrics', fontsize=14)
+    axes = axes.flatten()
 
-# Best-by-median summary (print before plotting)
-print(f"\n[Window={WINDOW}] Best model(s) by median for each metric\n" + "-"*70)
-for metric in METRICS:
-    # Get median values for each model
-    medians = (
-        df[df['model'].isin(models)]
-        .groupby('model')[metric]
-        .median()
-        .dropna()
-    )
-    if medians.empty:
-        print(f"{metric.upper():<15} | No data available")
-        continue
+    # Create boxplots for each metric
+    for idx, metric in enumerate(metrics):
+        ax = axes[idx]
+        data = [df[df['model'] == m][metric].dropna() for m in _MODELS]
+        bp = ax.boxplot(data, patch_artist=True)
+        for patch, color in zip(bp['boxes'], pastel_colors):
+            patch.set_facecolor(color)
+        ax.set_title(metric.upper(), fontsize=10)
+        ax.set_xticklabels(_MODELS, fontsize=8, rotation=45, ha='right')
+        ax.tick_params(axis='y', labelsize=8)
+        ax.grid(axis='y', linestyle='--', linewidth=0.4)
 
-    best_val = medians.max()
-    best_models = medians[medians == best_val].index.tolist()
-    best_models_str = ", ".join(best_models)
+    # Hide unused axes
+    for idx in range(len(metrics), len(axes)):
+        axes[idx].axis('off')
 
-    # Print the best model(s) for the metric
-    print(f"{metric.upper():<15} | best median = {best_val:.3f} | model(s): {best_models_str}")
-print("-"*70 + "\n")
-
-n_models = len(models)
-
-# Generate pastel colors for each model
-start_hex = '#FCB9AA'
-end_hex   = '#35AAAB'
-start_rgb = np.array(mcolors.to_rgb(start_hex))
-end_rgb   = np.array(mcolors.to_rgb(end_hex))
-
-if n_models > 1:
-    pastel_colors = [
-        mcolors.to_hex(start_rgb + (end_rgb - start_rgb) * i/(n_models-1))
-        for i in range(n_models)
-    ]
-else:
-    pastel_colors = [start_hex]
+    # Show plot
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.show()
 
 
-# Draw boxplots
-ncols = 4
-nrows = math.ceil(len(METRICS) / ncols)
-fig, axes = plt.subplots(
-    nrows=nrows,
-    ncols=ncols,
-    figsize=(6*ncols, 6*nrows),
-    constrained_layout=False
-)
-fig.suptitle(f'Model Comparison on Window={WINDOW} Across Metrics', fontsize=14)
-axes = axes.flatten()
-
-# Create boxplots for each metric
-for idx, metric in enumerate(METRICS):
-    ax = axes[idx]
-    data = [df[df['model'] == m][metric].dropna() for m in models]
-    bp = ax.boxplot(data, patch_artist=True)
-    for patch, color in zip(bp['boxes'], pastel_colors):
-        patch.set_facecolor(color)
-    ax.set_title(metric.upper(), fontsize=10)
-    ax.set_xticklabels(models, fontsize=8, rotation=45, ha='right')
-    ax.tick_params(axis='y', labelsize=8)
-    ax.grid(axis='y', linestyle='--', linewidth=0.4)
-
-# Hide unused axes
-for idx in range(len(METRICS), len(axes)):
-    axes[idx].axis('off')
-
-
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plt.show()
+if __name__ == '__main__':
+    main()
 
