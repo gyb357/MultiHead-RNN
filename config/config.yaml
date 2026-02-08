@@ -16,7 +16,7 @@ undersample_test: false
 scaler: standard
 
 # DataLoader
-batch_size: 64
+batch_size: 128
 device: cpu  # (cpu, cuda, mps)
 
 # Model
@@ -34,7 +34,7 @@ rnn_kwargs:
   # ode_unfolds: 6
   # CfC
   activation: tanh
-  backbone_units: 26
+  backbone_units: 27
   backbone_layers: 1
   backbone_dropout: 0.0
 
@@ -44,7 +44,4 @@ lr: 0.001
 patience: 20
 accumulation_steps: 1
 threshold: 0.50
-
-# Plot
-window: 5 # (3, 4, 5)
 
