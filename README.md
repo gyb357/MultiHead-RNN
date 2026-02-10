@@ -15,9 +15,9 @@
 
 # 📑Introduction
 
-## Multi-Head Neural Networks for Financial Time Series Classification
+## Multi-Head Recurrent Neural Networks for Financial Time Series Classification
 
-This repository implements a multi-head architecture for bankruptcy prediction on financial time series. It uses recurrent models—LTC, CfC, LSTM, and GRU—to process multiple financial indicators in parallel, and includes various preprocessing techniques, undersampling methods to address class imbalance, and comprehensive evaluation metrics.
+This repository implements a multi-head architecture for bankruptcy prediction on financial time series. It uses recurrent models—LTC, CfC, LSTM, GRU and RNN—to process multiple financial indicators in parallel, and includes various preprocessing techniques, undersampling methods to address class imbalance, and comprehensive evaluation metrics.
 
 
 ---
