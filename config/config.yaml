@@ -32,13 +32,17 @@ dropout: 0.0
 rnn_kwargs:
   # LTC
   # ode_unfolds: 6
+  # mixed_memory: false
+  
   # CfC
-  activation: tanh
+  activation: lecun_tanh
   backbone_units: 27
   backbone_layers: 1
   backbone_dropout: 0.0
+  mixed_memory: false
 
 # Training
+train: true
 epochs: 100
 lr: 0.001
 patience: 20

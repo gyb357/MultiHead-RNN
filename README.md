@@ -38,28 +38,22 @@ The architecture employs a multi-head design where each financial variable is pr
 
 ### 1. Liquid Time-Constant Networks (LTC)
 
-Continuous-time recurrent network with liquid time constants. Uses the [ncps](https://github.com/mlech26l/ncps) library for implementation.
+Continuous-time recurrent network with liquid time constants.
 
 * **Paper:** [https://arxiv.org/pdf/2006.04439](https://arxiv.org/pdf/2006.04439)
 
 ### 2. Closed-form Continuous-time Networks (CfC)
 
-Efficient continuous-time networks with closed-form solutions. Uses the [ncps](https://github.com/mlech26l/ncps) library with lecun_tanh activation.
+Efficient continuous-time networks with closed-form solutions.
 
 * **Paper:** [https://arxiv.org/pdf/2106.13898](https://arxiv.org/pdf/2106.13898)
 
 
 ### 3. Recurrent Neural Network (RNN)
 
-Recurrent network capturing sequential dependencies via hidden‑state recurrence.
-
 ### 4. Long Short-Term Memory (LSTM)
 
-Traditional recurrent network with memory cells.
-
 ### 5. Gated Recurrent Unit (GRU)
-
-Simplified recurrent network with gating mechanisms.
 
 
 ---
@@ -124,6 +118,8 @@ python main.py
 ### Results
 
 * Model checkpoints: `result/best_model.pth`
-* Experimental results: `result/[Model Name]_[Scaler Name]_[Threshold]_[RNN Hidden Size]_[FC Hidden Size].csv`
+* Experimental results: `./result/scaler/"model"_"rnn hidden size"_"projection size"_"fc hidden size"_"threshold"`
 * Show plots: `python plot.py`
+
+> **Note:** To view the plot, place the CSV file in the `./plot` folder.
 

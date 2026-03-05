@@ -136,58 +136,63 @@ def main(cfg: DictConfig) -> None:
             print(f"FC Parameters: {get_parameters(model.fc)}")
             print(f"Total Parameters: {get_parameters(model)}")
 
-            # Logging path
-            csv_save_path = (
-                f"result/"
-                f"{model_type.__name__}"
-                f"{cfg.type.upper()}_"
-                f"{scaler.__class__.__name__}_"
-                f"{cfg.threshold}_"        # Threshold
-                f"{cfg.rnn_hidden_size}_"  # RNN size
-                f"{cfg.fc_hidden_size}"    # FC size
-            )
+            # Training and evaluation
+            if cfg.train:
+                # Logging path
+                # ./result/scaler/"model"_"rnn hidden size"_"projection size"_"fc hidden size"_"threshold"
+                csv_save_path = (
+                    # Directory
+                    f"result/"
+                    f"{scaler.__class__.__name__}/"
+                    # CSV name
+                    f"{model_type.__name__}{cfg.type.upper()}_"
+                    f"{cfg.rnn_hidden_size}_"
+                    f"{cfg.projection_size}_"
+                    f"{cfg.fc_hidden_size}_"
+                    f"th-{cfg.threshold}"
+                )
 
-            # Training
-            fit(
-                model,
-                train_dataloader=train_dataloader,
-                valid_dataloader=valid_dataloader,
-                device=device,
-                epochs=cfg.epochs,
-                lr=cfg.lr,
-                patience=cfg.patience,
-                accumulation_steps=cfg.accumulation_steps,
-                num_classes=cfg.num_classes,
-                threshold=cfg.threshold,
-                run=run,
-                window=window,
-                csv_path=csv_save_path + "_valid.csv"
-            )
+                # Training
+                fit(
+                    model,
+                    train_dataloader=train_dataloader,
+                    valid_dataloader=valid_dataloader,
+                    device=device,
+                    epochs=cfg.epochs,
+                    lr=cfg.lr,
+                    patience=cfg.patience,
+                    accumulation_steps=cfg.accumulation_steps,
+                    num_classes=cfg.num_classes,
+                    threshold=cfg.threshold,
+                    run=run,
+                    window=window,
+                    csv_path=csv_save_path + "_valid.csv"
+                )
 
-            # Load best model for evaluation
-            checkpoint = torch.load('result/best_model.pth', map_location=device)
-            model.load_state_dict(checkpoint['model'])
+                # Load best model for evaluation
+                checkpoint = torch.load('result/best_model.pth', map_location=device)
+                model.load_state_dict(checkpoint['model'])
 
-            # Test evaluation
-            start_time = time.time()
-            test_metrics = eval(
-                model=model,
-                data_loader=test_dataloader,
-                device=device,
-                threshold=cfg.threshold,
-                cik_status=cik_status_df,
-                csv_path=csv_save_path + f"_window-{window}_preds.csv"
-            )
-            end_time = time.time()
+                # Test evaluation
+                start_time = time.time()
+                test_metrics = eval(
+                    model=model,
+                    data_loader=test_dataloader,
+                    device=device,
+                    threshold=cfg.threshold,
+                    cik_status=cik_status_df,
+                    csv_path=csv_save_path + f"_window-{window}_preds.csv"
+                )
+                end_time = time.time()
 
-            # Save predictions
-            save_results(
-                run,
-                window=window,
-                metrics=test_metrics,
-                train_time=end_time - start_time,
-                csv_path=csv_save_path + "_test.csv"
-            )
+                # Save predictions
+                save_results(
+                    run,
+                    window=window,
+                    metrics=test_metrics,
+                    train_time=end_time - start_time,
+                    csv_path=csv_save_path + "_test.csv"
+                )
 
 
 if __name__ == '__main__':

@@ -17,8 +17,17 @@ _ALLOWED_ARGS = {
     'rnn': None,
     'lstm': None,
     'gru': None,
-    'ltc': {'ode_unfolds'},
-    'cfc': {'activation', 'backbone_units', 'backbone_layers', 'backbone_dropout'}
+    'ltc': {
+        'ode_unfolds',
+        'mixed_memory',
+    },
+    'cfc': {
+        'activation',
+        'backbone_units',
+        'backbone_layers',
+        'backbone_dropout',
+        'mixed_memory',
+    }
 }
 
 
