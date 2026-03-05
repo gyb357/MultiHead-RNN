@@ -36,24 +36,22 @@ The architecture employs a multi-head design where each financial variable is pr
 
 > **Note:** Papers are [here](https://www.mdpi.com/1999-5903/16/3/79).
 
-### 1. Liquid Time-Constant Networks (LTC)
+### Liquid Time-Constant Networks (LTC)
 
 Continuous-time recurrent network with liquid time constants.
-
 * **Paper:** [https://arxiv.org/pdf/2006.04439](https://arxiv.org/pdf/2006.04439)
 
-### 2. Closed-form Continuous-time Networks (CfC)
+### Closed-form Continuous-time Networks (CfC)
 
 Efficient continuous-time networks with closed-form solutions.
-
 * **Paper:** [https://arxiv.org/pdf/2106.13898](https://arxiv.org/pdf/2106.13898)
 
 
-### 3. Recurrent Neural Network (RNN)
+### Recurrent Neural Network (RNN)
 
-### 4. Long Short-Term Memory (LSTM)
+### Long Short-Term Memory (LSTM)
 
-### 5. Gated Recurrent Unit (GRU)
+### Gated Recurrent Unit (GRU)
 
 
 ---
@@ -79,13 +77,14 @@ pip install -r requirements.txt
 
 ### Required Dependencies
 
-* torch
-* pandas
-* matplotlib
-* scikit-learn
-* ncps
-* rich
-* pyyaml
+ * torch
+ * pandas
+ * matplotlib
+ * scikit-learn
+ * ncps
+ * rich
+ * pyyaml
+ * hydra-core
 
 ## 3. Download Datasets
 
@@ -95,7 +94,7 @@ https://github.com/sowide/multi-head_LSTM_for_bankruptcy-prediction
 
 ## 4. Configuration
 
-Modify `./config/configs.yaml` to customize your experiment.
+Modify `./config/config.yaml` to customize your experiment.
 
 ## 5. Training the Model
 
@@ -104,9 +103,17 @@ Modify `./config/configs.yaml` to customize your experiment.
 Ensure your dataset is structured as:
 
 ```
-dataset/{window}_train.csv
-ataset/{window}_valid.csv
-dataset/{window}_test.csv
+./dataset/{window}_train.csv
+./dataset/{window}_valid.csv
+./dataset/{window}_test.csv
+```
+
+exam:
+```
+./dataset/3_test.csv
+./dataset/3_train.csv
+./dataset/3_valid.csv
+   ...
 ```
 
 ### Running Training
