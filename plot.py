@@ -28,10 +28,10 @@ def main() -> None:
     metrics = columns[:16]
 
     # Load csv
-    files = list(Path('result/').glob('*.csv'))
+    files = list(Path('plot/').glob('*.csv'))
     print(f"Found {len(files)} csv files.")
     if not files:
-        raise FileNotFoundError("No CSV files found in the 'result' directory.")
+        raise FileNotFoundError("No CSV files found in the 'plot' directory.")
     
     df_list = []
     for file in files:
