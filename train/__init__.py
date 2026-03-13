@@ -13,6 +13,7 @@ from sklearn.metrics import (
     balanced_accuracy_score,
     roc_auc_score,
     average_precision_score,
+    matthews_corrcoef,
     f1_score,
     recall_score,
     precision_score
@@ -39,7 +40,7 @@ __all__ = [
     'NamedTuple', 'List', 'Union', 'Dict',
     'Tensor', 'device',
     'Path',
-    'confusion_matrix', 'accuracy_score', 'balanced_accuracy_score', 'roc_auc_score', 'average_precision_score', 'f1_score', 'recall_score', 'precision_score',
+    'confusion_matrix', 'accuracy_score', 'balanced_accuracy_score', 'roc_auc_score', 'average_precision_score', 'matthews_corrcoef', 'f1_score', 'recall_score', 'precision_score',
 
     # train.py
     'time',

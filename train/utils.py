@@ -54,6 +54,9 @@ class ClassificationMetrics(NamedTuple):
     roc_auc: float
     pr_auc: float
 
+    # Matthews correlation coefficient
+    mcc: float
+
     # F1 scores
     micro_f1: float
     macro_f1: float
@@ -74,6 +77,8 @@ class ClassificationMetrics(NamedTuple):
             self.true_positive, self.true_negative, self.false_positive, self.false_negative,
             # Overall metrics
             self.accuracy, self.balanced_accuracy, self.roc_auc, self.pr_auc,
+            # Matthews correlation coefficient
+            self.mcc,
             # F1 scores
             self.micro_f1, self.macro_f1,
             # Class-specific metrics
@@ -172,6 +177,9 @@ def binary_classification_metrics(
     roc_auc = roc_auc_score(lab, prob)
     pr_auc = average_precision_score(lab, prob)
 
+    # Matthews correlation coefficient
+    mcc = matthews_corrcoef(lab, pred)
+
     # F1 scores
     micro_f1 = f1_score(lab, pred, average='micro', zero_division=0)
     macro_f1 = f1_score(lab, pred, average='macro', zero_division=0)
@@ -189,6 +197,7 @@ def binary_classification_metrics(
     return ClassificationMetrics(
         tp, tn, fp, fn,
         acc, bac, roc_auc, pr_auc,
+        mcc,
         micro_f1, macro_f1,
         rec_bankruptcy, pr_bankruptcy, rec_healthy, pr_healthy,
         type_1_err, type_2_err
